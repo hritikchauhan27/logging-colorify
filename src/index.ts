@@ -1,14 +1,16 @@
+import chalk = require("chalk");
+
 export class Log{
     static info(msg: string){
-        console.log(`%c${msg}`,'color:black;background:yellow');
+        console.log(chalk.blue.bgYellow(msg));
     }
 
     static warn(msg:string){
-        console.log(`%c${msg}`,'color:yellow');
+        console.log(chalk.yellow(msg));
     }
 
     static error(msg:string){
-        console.log(`%c${msg}`,'color:red');
+        console.log(chalk.red(msg));
     }
     
 }
