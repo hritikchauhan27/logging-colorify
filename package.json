@@ -1,0 +1,28 @@
+{
+  "name": "package",
+  "version": "1.0.0",
+  "description": "logging with different color",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hritikchauhan27/logging-colorify.git"
+  },
+  "keywords": [
+    "logging with color"
+  ],
+  "author": "Hritik",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hritikchauhan27/logging-colorify/issues"
+  },
+  "homepage": "https://github.com/hritikchauhan27/logging-colorify#readme",
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
+  "files": ["lib/**/*"]
+}
