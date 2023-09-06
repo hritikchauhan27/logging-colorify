@@ -1,38 +1,48 @@
+import { colors, bgColors } from './color';
+import * as fs from 'fs';
+
 export class Log {
     static logWithColor(msg: string, color: string, bgColor?: string) {
-      const colors: { [key: string]: string } = {
-        black: '30',
-        red: '31',
-        green: '32',
-        yellow: '33',
-        blue: '34',
-        magenta: '35',
-        cyan: '36',
-        white: '37',
-      };
-  
-      const bgColors: { [key: string]: string } = {
-        black: '40',
-        red: '41',
-        green: '42',
-        yellow: '43',
-        blue: '44',
-        magenta: '45',
-        cyan: '46',
-        white: '47',
-      };
-  
-      const colorCode = colors[color];
-      const bgColorCode = bgColors[bgColor || 'black'];
-  
-      const timestamp = new Date().toLocaleString();
-  
-      if (colorCode && bgColorCode) {
-        console.log(`\x1b[${bgColorCode};${colorCode}m[${timestamp}] ${msg}\x1b[0m`); //----  \x1b[36m%s\x1b[0m
-      } else if (colorCode) {
-        console.log(`\x1b[${colorCode}m[${timestamp}] ${msg}\x1b[0m`);
-      } else {
-        console.log(`[${timestamp}] ${msg}`);
-      }
+        const colorCode = colors[color];
+        const bgColorCode = bgColors[bgColor || 'black'];
+
+        const timestamp = new Date().toLocaleString();
+
+        if (colorCode && bgColorCode) {
+            console.log(`\x1b[${bgColorCode};${colorCode}m[${timestamp}] ${msg}\x1b[0m`);
+            return `[${timestamp}] ${msg}`;
+        } else if (colorCode) {
+            console.log(`\x1b[${colorCode}m[${timestamp}] ${msg}\x1b[0m`);
+            return `[${timestamp}] ${msg}`;
+        } else {
+            console.log(`[${timestamp}] ${msg}`);
+            return `[${timestamp}] ${msg}`;
+        }
+
+
     }
-  }
+
+    private static writeToLogFile(msg: string, filename: string) {
+        fs.appendFile(filename, msg + '\n', (err) => {
+            if (err) {
+                console.error('Error writing to log file:', err);
+            }
+        });
+    }
+
+    static error(msg: string) {
+        const logMessage = this.logWithColor(msg, 'red', 'white');
+        this.writeToLogFile(logMessage, 'error.log');
+    }
+
+    static info(msg: string) {
+        const logMessage = this.logWithColor(msg, 'blue', 'white');
+        this.writeToLogFile(logMessage, 'info.log');
+    }
+
+    static warn(msg: string) {
+        const logMessage = this.logWithColor(msg, 'yellow', 'black');
+        this.writeToLogFile(logMessage, 'warn.log');
+    }
+
+}

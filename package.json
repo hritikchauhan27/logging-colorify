@@ -1,6 +1,6 @@
 {
-  "name": "logging-colorify-v2",
-  "version": "1.0.3",
+  "name": "logging-colorify",
+  "version": "1.0.1",
   "description": "logging with different color",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -22,9 +22,13 @@
   },
   "homepage": "https://github.com/hritikchauhan27/logging-colorify#readme",
   "devDependencies": {
+    "@types/node": "^20.5.9",
     "typescript": "^5.2.2"
   },
   "files": [
     "lib/**/*"
-  ]
+  ],
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
 }
