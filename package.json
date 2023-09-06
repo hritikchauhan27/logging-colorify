@@ -1,6 +1,6 @@
 {
-  "name": "logging-colorify",
-  "version": "1.0.0",
+  "name": "logging-colorify-v2",
+  "version": "1.0.3",
   "description": "logging with different color",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,8 +26,5 @@
   },
   "files": [
     "lib/**/*"
-  ],
-  "dependencies": {
-    "chalk": "^4.1.2"
-  }
+  ]
 }
