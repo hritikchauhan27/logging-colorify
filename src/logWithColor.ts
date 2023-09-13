@@ -13,7 +13,7 @@ export async function logWithColor(msg: string, color: string, bgColor?: string)
     } else if (colorCode) {
         console.log(`\x1b[${colorCode}m${logMessage}\x1b[0m`);
     } else {
-        console.log(logMessage);
+        console.log(logMessage);  
     }
 
     return logMessage;
