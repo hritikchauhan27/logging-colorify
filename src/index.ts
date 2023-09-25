@@ -22,17 +22,18 @@ async function logWarn(msg: string) {
 
 async function createApiLogger(req: any) {
     const logData = await {
-        method: req.method,
+        method: req.method, 
         path: req.url,
         query: req.query || {},
         headers: req.headers,
-        body: req.body || {},
+        body: req.body || req.payload || {},
         timestamp: new Date().toISOString(),
     };
 
     const logEntry = JSON.stringify(logData, null, 2);
+    const logFileName = await getLogFileName('api_detail', 'log');
 
-    await writeToLogFile(logEntry, 'api-request-detail.log');
+    await writeToLogFile(logEntry, logFileName);
 }
 
 export {logError,logInfo,logWarn,createApiLogger}
