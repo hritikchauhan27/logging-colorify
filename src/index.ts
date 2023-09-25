@@ -1,6 +1,7 @@
 import { logWithColor } from './logWithColor';
 import { getLogFileName, writeToLogFile } from './create.file';
 
+
 async function logError(msg: string) {
     const logMessage = await logWithColor(msg, 'red', 'white');
     const logFileName = await getLogFileName('error', 'log');
@@ -19,4 +20,19 @@ async function logWarn(msg: string) {
     await writeToLogFile(logMessage, logFileName);
 }
 
-export { logError, logInfo, logWarn };
+async function createApiLogger(req: any) {
+    const logData = await {
+        method: req.method,
+        path: req.url,
+        query: req.query || {},
+        headers: req.headers,
+        body: req.body || {},
+        timestamp: new Date().toISOString(),
+    };
+
+    const logEntry = JSON.stringify(logData, null, 2);
+
+    await writeToLogFile(logEntry, 'api-request-detail.log');
+}
+
+export {logError,logInfo,logWarn,createApiLogger}

@@ -1,11 +1,16 @@
 {
-     "compilerOptions": {
-        "target": "ES5",
-        "module": "CommonJS",
-        "declaration": true,
-        "outDir": "./lib",
-        "strict": true
-     },
-     "include": ["src"],
-     "exclude": ["node_modules"]
-}
+    "compilerOptions": {
+       "target": "ES5",
+       "module": "CommonJS",
+       "declaration": true,
+       "outDir": "./lib",
+       "strict": true
+    },
+    "include": [
+       "src",
+       "index.d.ts"
+    ],
+    "exclude": [
+       "node_modules"
+    ]
+ }
