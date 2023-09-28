@@ -21,24 +21,46 @@ async function logWarn(msg: string) {
 }
 
 async function createApiLogger(req: any, startTime?: Date) {
-    const timestamp = new Date();
-    const timeDifference = startTime ? timestamp.getTime() - startTime.getTime() : null;
     const logData = {
-        method: req.method,
-        path: req.url,
-        query: req.query || {},
-        headers: req.headers,
-        body: req.body || req.payload || {},
-        timestamp: timestamp.toISOString(),
-        TimeDifference: startTime
-            ? `The time difference is ${timeDifference} milliseconds.`
-            : 'startTime is required for the timeDifference'
+        Timestamp: '',
+        Method: '',
+        Path: '',
+        RouteParams:{},
+        QueryParams: {},
+        Headers: {},
+        Body: {},
+        ClientIP: '',
+        TimeDifference: '',
+        Error: null
     };
 
-    const logEntry = JSON.stringify(logData, null, 2);
-    const logFileName = await getLogFileName('api_detail', 'log');
+    try {
+        const timestamp = new Date();
+        const timeDifference = startTime ? timestamp.getTime() - startTime.getTime() : null;
+        const clientIP = req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+        logData.Timestamp = timestamp.toISOString();
+        logData.Method = req.method;
+        logData.Path = req.url;
+        logData.RouteParams= req.params;
+        logData.QueryParams = req.query || {};
+        logData.Headers = req.headers;
+        logData.Body = req.body || req.payload || {};
+        logData.ClientIP = clientIP;
+        logData.TimeDifference = startTime
+            ? `The time difference is ${timeDifference} milliseconds.`
+            : 'startTime is required for the timeDifference';
+        
+        const logEntry = JSON.stringify(logData, null, 2);
+        const logFileName = await getLogFileName('api_detail', 'log');
 
-    await writeToLogFile(logEntry, logFileName);
+        await writeToLogFile(logEntry, logFileName);
+    } catch (error:any) {
+        logData.Error = error.message;
+        const errorLogFileName = await getLogFileName('api_error', 'log');
+        const errorLogEntry = JSON.stringify(logData, null, 2);
+        await writeToLogFile(errorLogEntry, errorLogFileName);
+    }
 }
+
 
 export { logError, logInfo, logWarn, createApiLogger }
