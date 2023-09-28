@@ -1,5 +1,5 @@
 import { logWithColor } from './logWithColor';
-import { getLogFileName, writeToLogFile } from './create.file';
+import { getLogFileName, writeToLogFile, getClientIP} from './create.file';
 
 
 async function logError(msg: string) {
@@ -37,7 +37,7 @@ async function createApiLogger(req: any, startTime?: Date) {
     try {
         const timestamp = new Date();
         const timeDifference = startTime ? timestamp.getTime() - startTime.getTime() : null;
-        const clientIP = req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+        const clientIP = getClientIP(req);
         logData.Timestamp = timestamp.toISOString();
         logData.Method = req.method;
         logData.Path = req.url;

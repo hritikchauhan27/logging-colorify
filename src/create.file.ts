@@ -15,3 +15,23 @@ export async function writeToLogFile(msg: string, filename: string) {
         console.error('Error writing to log file:', err);
     }
 }
+
+export function getClientIP(request:any) {
+    if (request && request.ip) {
+        return request.ip;
+    }
+
+    if (request && request.info && request.info.remoteAddress) {
+        return request.info.remoteAddress;
+    }
+
+    if (request && request.clientIP) {
+        return request.clientIP;
+    }
+
+    if (request && request.ip) {
+        return request.ip;
+    }
+
+    return 'Unknown';
+}
