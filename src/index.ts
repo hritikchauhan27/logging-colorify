@@ -20,14 +20,19 @@ async function logWarn(msg: string) {
     await writeToLogFile(logMessage, logFileName);
 }
 
-async function createApiLogger(req: any) {
-    const logData = await {
-        method: req.method, 
+async function createApiLogger(req: any, startTime?: Date) {
+    const timestamp = new Date();
+    const timeDifference = startTime ? timestamp.getTime() - startTime.getTime() : null;
+    const logData = {
+        method: req.method,
         path: req.url,
         query: req.query || {},
         headers: req.headers,
         body: req.body || req.payload || {},
-        timestamp: new Date().toISOString(),
+        timestamp: timestamp.toISOString(),
+        TimeDifference: startTime
+            ? `The time difference is ${timeDifference} milliseconds.`
+            : 'startTime is required for the timeDifference'
     };
 
     const logEntry = JSON.stringify(logData, null, 2);
@@ -36,4 +41,4 @@ async function createApiLogger(req: any) {
     await writeToLogFile(logEntry, logFileName);
 }
 
-export {logError,logInfo,logWarn,createApiLogger}
+export { logError, logInfo, logWarn, createApiLogger }
