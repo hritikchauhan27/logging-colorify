@@ -1,31 +1,51 @@
 import { logWithColor } from './logWithColor';
-import { getLogFileName, writeToLogFile, getClientIP} from './create.file';
+import { getLogFileName, writeToLogFile, getClientIP, getfileName } from './create.file';
+import {LogOptions, allTypeLogsOptions, dailyApiDetail, dailyError, dailyInfo,
+     dailyWarn, monthlyApiDetail, monthlyError, monthlyInfo, monthlyWarn} from './log.options';
 
 
-async function logError(msg: string) {
+async function logError(msg: string, options: LogOptions = allTypeLogsOptions) {
+    const logFileName = getfileName(options)
     const logMessage = await logWithColor(msg, 'red', 'white');
-    const logFileName = await getLogFileName('error', 'log');
+
     await writeToLogFile(logMessage, logFileName);
 }
 
-async function logInfo(msg: string) {
+async function logInfo(msg: string, options: LogOptions = allTypeLogsOptions) {
+    const {
+        logPrefix,
+        logExtension,
+        logGrouping,
+    } = options;
+
     const logMessage = await logWithColor(msg, 'blue', 'white');
-    const logFileName = await getLogFileName('info', 'log');
+    const logFileName = getfileName(options)
+
     await writeToLogFile(logMessage, logFileName);
 }
 
-async function logWarn(msg: string) {
+
+async function logWarn(msg: string, options: LogOptions = allTypeLogsOptions) {
+    const {
+        logPrefix,
+        logExtension,
+        logGrouping,
+    } = options;
+
     const logMessage = await logWithColor(msg, 'yellow', 'black');
-    const logFileName = await getLogFileName('warn', 'log');
+    const logFileName = getfileName(options)
+
     await writeToLogFile(logMessage, logFileName);
 }
 
-async function createApiLogger(req: any, startTime?: Date) {
+async function createApiLogger(req: any, startTime?: number, options: LogOptions = dailyApiDetail) {
+    const {logPrefix,logExtension,logGrouping} = options;
+
     const logData = {
         Timestamp: '',
         Method: '',
         Path: '',
-        RouteParams:{},
+        RouteParams: {},
         QueryParams: {},
         Headers: {},
         Body: {},
@@ -35,26 +55,29 @@ async function createApiLogger(req: any, startTime?: Date) {
     };
 
     try {
-        const timestamp = new Date();
-        const timeDifference = startTime ? timestamp.getTime() - startTime.getTime() : null;
         const clientIP = getClientIP(req);
-        logData.Timestamp = timestamp.toISOString();
+        logData.Timestamp = new Date().toISOString();
         logData.Method = req.method;
         logData.Path = req.url;
-        logData.RouteParams= req.params;
+        logData.RouteParams = req.params;
         logData.QueryParams = req.query || {};
         logData.Headers = req.headers;
         logData.Body = req.body || req.payload || {};
         logData.ClientIP = clientIP;
-        logData.TimeDifference = startTime
-            ? `The time difference is ${timeDifference} milliseconds.`
-            : 'startTime is required for the timeDifference';
-        
+
+        if (typeof startTime === 'number') {
+            const endTime = performance.now();
+            const timeDifference = endTime - startTime;
+            logData.TimeDifference = `The time difference is ${timeDifference} milliseconds.`;
+        } else {
+            logData.TimeDifference = 'startTime is required for the timeDifference';
+        }
+
         const logEntry = JSON.stringify(logData, null, 2);
-        const logFileName = await getLogFileName('api_detail', 'log');
+        const logFileName = getfileName(options)
 
         await writeToLogFile(logEntry, logFileName);
-    } catch (error:any) {
+    } catch (error: any) {
         logData.Error = error.message;
         const errorLogFileName = await getLogFileName('api_error', 'log');
         const errorLogEntry = JSON.stringify(logData, null, 2);
@@ -63,4 +86,7 @@ async function createApiLogger(req: any, startTime?: Date) {
 }
 
 
-export { logError, logInfo, logWarn, createApiLogger }
+export {
+    logError, logInfo, logWarn, createApiLogger, LogOptions, monthlyApiDetail, monthlyError,
+    monthlyInfo, monthlyWarn, dailyApiDetail, dailyError, dailyInfo, dailyWarn ,allTypeLogsOptions
+}

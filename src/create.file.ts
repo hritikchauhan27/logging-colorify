@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { LogOptions } from './log.options';
 
 export async function getLogFileName(prefix: string, extension: string) {
     const currentDate = new Date();
@@ -34,4 +35,24 @@ export function getClientIP(request:any) {
     }
 
     return 'Unknown';
+}
+
+
+export function getfileName(options: LogOptions){
+    let logFileName;
+    if (options.logGrouping === 'custom') {
+        logFileName = `${options.logPrefix}.${options.logExtension}`;
+    } else {
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        const day = currentDate.getDate().toString().padStart(2, '0');
+
+        if (options.logGrouping === 'monthly') {
+            logFileName = `${options.logPrefix}_${year}-${month}.${options.logExtension}`;
+        } else {
+            logFileName = `${options.logPrefix}_${year}-${month}-${day}.${options.logExtension}`;
+        }
+    }
+    return logFileName;
 }
