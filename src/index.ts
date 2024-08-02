@@ -1,30 +1,39 @@
 import { logWithColor } from './logWithColor';
-import { getLogFileName, writeToLogFile, getClientIP, getfileName } from './create.file';
-import {LogOptions, allTypeLogsOptions, dailyApiDetail, dailyError, dailyInfo,
-     dailyWarn, monthlyApiDetail, monthlyError, monthlyInfo, monthlyWarn} from './log.options';
+import { getLogFileName, writeToLogFile, getClientIP, getfileName, deleteOldLogFiles } from './create.file';
 
+async function logMessage(msg: string, level: 'info' | 'error' | 'warn', frequency: 'daily' | 'monthly' | 'yearly', customDir?: string) {
+    let color: string;
+    let bgColor: string;
 
-async function logError(msg: string, options: LogOptions = allTypeLogsOptions) {
-    const logFileName = getfileName(options)
-    const logMessage = await logWithColor(msg, 'red', 'white');
+    switch (level) {
+        case 'error':
+            color = 'red';
+            bgColor = 'white';
+            break;
+        case 'warn':
+            color = 'yellow';
+            bgColor = 'black';
+            break;
+        case 'info':
+        default:
+            color = 'blue';
+            bgColor = 'white';
+            break;
+    }
+
+    const logMessage = await logWithColor(msg, color, bgColor);
+    const logFileName = getfileName(frequency, customDir);
     await writeToLogFile(logMessage, logFileName);
+    await deleteOldLogFiles(frequency, customDir); 
 }
 
-async function logInfo(msg: string, options: LogOptions = allTypeLogsOptions) {
-    const logMessage = await logWithColor(msg, 'blue', 'white');
-    const logFileName = getfileName(options)
-    await writeToLogFile(logMessage, logFileName);
-}
+export const log = {
+    info: (msg: string, frequency: 'daily' | 'monthly' | 'yearly', customDir?: string) => logMessage(msg, 'info', frequency, customDir),
+    error: (msg: string, frequency: 'daily' | 'monthly' | 'yearly', customDir?: string) => logMessage(msg, 'error', frequency, customDir),
+    warn: (msg: string, frequency: 'daily' | 'monthly' | 'yearly', customDir?: string) => logMessage(msg, 'warn', frequency, customDir),
+};
 
-
-async function logWarn(msg: string, options: LogOptions = allTypeLogsOptions) {
-    const logMessage = await logWithColor(msg, 'yellow', 'black');
-    const logFileName = getfileName(options)
-    await writeToLogFile(logMessage, logFileName);
-}
-
-async function createApiLogger(req: any, startTime?: number, options: LogOptions = dailyApiDetail) {
-
+async function createApiLogger(req: any, frequency: 'daily' | 'monthly' | 'yearly', startTime?: number, customDir?: string) {
     const logData = {
         Timestamp: '',
         Method: '',
@@ -58,18 +67,17 @@ async function createApiLogger(req: any, startTime?: number, options: LogOptions
         }
 
         const logEntry = JSON.stringify(logData, null, 2);
-        const logFileName = getfileName(options)
+        const logFileName = getfileName(frequency, customDir);
 
         await writeToLogFile(logEntry, logFileName);
     } catch (error: any) {
         logData.Error = error.message;
-        const errorLogFileName = await getLogFileName('api_error', 'log');
+        const errorLogFileName = await getLogFileName('api_error', 'log', frequency, customDir);
         const errorLogEntry = JSON.stringify(logData, null, 2);
         await writeToLogFile(errorLogEntry, errorLogFileName);
     }
 }
 
 export {
-    logError, logInfo, logWarn, createApiLogger, LogOptions, monthlyApiDetail, monthlyError,
-    monthlyInfo, monthlyWarn, dailyApiDetail, dailyError, dailyInfo, dailyWarn ,allTypeLogsOptions
-}
+    createApiLogger
+};

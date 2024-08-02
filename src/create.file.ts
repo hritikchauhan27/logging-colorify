@@ -1,12 +1,22 @@
 import * as fs from 'fs';
-import { LogOptions } from './log.options';
+import * as path from 'path';
 
-export async function getLogFileName(prefix: string, extension: string) {
+export async function getLogFileName(prefix: string, extension: string, frequency: 'daily' | 'monthly' | 'yearly', customDir?: string) {
     const currentDate = new Date();
     const year = currentDate.getFullYear();
     const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
     const day = currentDate.getDate().toString().padStart(2, '0');
-    return `${prefix}_${year}-${month}-${day}.${extension}`;
+
+    let fileName;
+    if (frequency === 'daily') {
+        fileName = `${prefix}_${year}-${month}-${day}.${extension}`;
+    } else if (frequency === 'monthly') {
+        fileName = `${prefix}_${year}-${month}.${extension}`;
+    } else { // 'yearly'
+        fileName = `${prefix}_${year}.${extension}`;
+    }
+
+    return customDir ? path.join(customDir, fileName) : fileName;
 }
 
 export async function writeToLogFile(msg: string, filename: string) {
@@ -14,6 +24,59 @@ export async function writeToLogFile(msg: string, filename: string) {
         await fs.promises.appendFile(filename, msg + '\n');
     } catch (err) {
         console.error('Error writing to log file:', err);
+    }
+}
+
+export function getfileName(frequency: 'daily' | 'monthly' | 'yearly', customDir?: string) {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = currentDate.getDate().toString().padStart(2, '0');
+
+    let logFileName;
+    if (frequency === 'daily') {
+        logFileName = `log_${year}-${month}-${day}.log`;
+    } else if (frequency === 'monthly') {
+        logFileName = `log_${year}-${month}.log`;
+    } else { // 'yearly'
+        logFileName = `log_${year}.log`;
+    }
+
+    return customDir ? path.join(customDir, logFileName) : logFileName;
+}
+
+export async function deleteOldLogFiles(frequency: 'daily' | 'monthly' | 'yearly', customDir?: string) {
+    const logDir = customDir || './logs'; 
+    const files = await fs.promises.readdir(logDir);
+
+    const currentDate = new Date();
+
+    for (const file of files) {
+        const filePath = path.join(logDir, file);
+        const stats = await fs.promises.stat(filePath);
+
+        const fileDate = new Date(stats.mtime);
+        let deleteFile = false;
+
+        switch (frequency) {
+            case 'daily':
+                deleteFile = (currentDate.getTime() - fileDate.getTime()) > 24 * 60 * 60 * 1000;
+                break;
+            case 'monthly':
+                deleteFile = (currentDate.getMonth() !== fileDate.getMonth()) || (currentDate.getFullYear() !== fileDate.getFullYear());
+                break;
+            case 'yearly':
+                deleteFile = (currentDate.getFullYear() !== fileDate.getFullYear());
+                break;
+            default:
+                deleteFile = false;
+                break;
+        }
+
+        if (deleteFile) {
+            await fs.promises.unlink(filePath);
+            console.log(`Deleted old log file: ${file}`);
+        }
     }
 }
 
@@ -35,24 +98,4 @@ export function getClientIP(request:any) {
     }
 
     return 'Unknown';
-}
-
-
-export function getfileName(options: LogOptions){
-    let logFileName;
-    if (options.logGrouping === 'custom') {
-        logFileName = `${options.logPrefix}.${options.logExtension}`;
-    } else {
-        const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        const day = currentDate.getDate().toString().padStart(2, '0');
-
-        if (options.logGrouping === 'monthly') {
-            logFileName = `${options.logPrefix}_${year}-${month}.${options.logExtension}`;
-        } else {
-            logFileName = `${options.logPrefix}_${year}-${month}-${day}.${options.logExtension}`;
-        }
-    }
-    return logFileName;
 }

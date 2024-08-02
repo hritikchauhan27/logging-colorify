@@ -1,51 +1,47 @@
 import { assert } from "chai";
 import {
     createApiLogger,
-    logError,
-    logInfo,
-    logWarn,
-    LogOptions,
-    dailyApiDetail,
-    allTypeLogsOptions
+    log,
 } from "../src/index";
 import { existsSync, readFileSync } from "fs";
 import { getfileName } from "../src/create.file";
 
 describe("Logging Functions", function () {
 
-    it("logError should log an error message in terminal and in a newly created file according to LogOption", async function () {
+    it("log.error should log an error message in terminal and in a newly created file according to the provided frequency and custom directory", async function () {
         const errorMessage = "This is an error message";
-        const logOptions: LogOptions = allTypeLogsOptions;
+        const frequency = "daily";
+        const customDir = "./logs/error";
 
-        await logError(errorMessage, logOptions);
+        await log.error(errorMessage, frequency, customDir);
 
-        const logFileName = getfileName(logOptions);
+        const logFileName = getfileName(frequency, customDir);
         assert.isTrue(logFileContains(logFileName, errorMessage));
     });
 
-
-    it("logInfo should log an info message in terminal and in a newly created file according to LogOption", async function () {
+    it("log.info should log an info message in terminal and in a newly created file according to the provided frequency and custom directory", async function () {
         const infoMessage = "This is an info message";
-        const logOptions: LogOptions = allTypeLogsOptions;
-        await logInfo(infoMessage, logOptions);
+        const frequency = "daily";
+        const customDir = "./logs/info";
 
-        const logFileName = getfileName(logOptions);
+        await log.info(infoMessage, frequency, customDir);
+
+        const logFileName = getfileName(frequency, customDir);
         assert.isTrue(logFileContains(logFileName, infoMessage));
     });
 
-
-    it("logWarn should log a warning message in terminal and in a newly created file according to LogOption", async function () {
+    it("log.warn should log a warning message in terminal and in a newly created file according to the provided frequency and custom directory", async function () {
         const warningMessage = "This is a warning message";
-        const logOptions: LogOptions = allTypeLogsOptions;
+        const frequency = "daily";
+        const customDir = "./logs/warn";
 
-        await logWarn(warningMessage, logOptions);
+        await log.warn(warningMessage, frequency, customDir);
 
-        const logFileName = getfileName(logOptions);
+        const logFileName = getfileName(frequency, customDir);
         assert.isTrue(logFileContains(logFileName, warningMessage));
     });
 
-
-    it("createApiLogger should log API details in a newly created file according to LogOption", async function () {
+    it("createApiLogger should log API details in a newly created file according to the provided frequency and custom directory", async function () {
         const request = {
             method: "GET",
             url: "/api/resource",
@@ -54,19 +50,19 @@ describe("Logging Functions", function () {
             headers: { "User-Agent": "Test" },
             body: { data: "test" },
         };
-        const startTime = 0; 
-        const logOptions: LogOptions = dailyApiDetail; 
+        const startTime = 0;
+        const frequency = "daily";
+        const customDir = "./logs/api";
 
-        await createApiLogger(request, startTime, logOptions);
+        await createApiLogger(request, frequency, startTime, customDir);
 
-        const logFileName = getfileName(logOptions);
+        const logFileName = getfileName(frequency, customDir);
         const logContent = readLogFile(logFileName);
 
         assert.isTrue(logContent.includes("GET"));
         assert.isTrue(logContent.includes("/api/resource"));
     });
 });
-
 
 function logFileContains(logFileName: string, message: string): boolean {
     const logContent = readLogFile(logFileName);
